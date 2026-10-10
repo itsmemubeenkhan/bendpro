@@ -21,10 +21,10 @@ jobs:
       - name: Generate test keystore
         run: |
           keytool -genkeypair -v -keystore /tmp/bendpro-test.jks -keyalg RSA -keysize 2048 -validity 10000 -alias bendpro -storepass testpass123 -keypass testpass123 -dname "CN=BendPro Test"
-          echo "storeFile=/tmp/bendpro-test.jks" > android/keystore.properties
-          echo "keyAlias=bendpro" >> android/keystore.properties
-          echo "storePassword=testpass123" >> android/keystore.properties
-          echo "keyPassword=testpass123" >> android/keystore.properties
+          echo "storeFile=/tmp/bendpro-test.jks" > android/key.properties
+          echo "keyAlias=bendpro" >> android/key.properties
+          echo "storePassword=testpass123" >> android/key.properties
+          echo "keyPassword=testpass123" >> android/key.properties
       - run: flutter pub get
       - run: flutter build apk --release
       - uses: actions/upload-artifact@v4

@@ -10,31 +10,16 @@ pluginManagement {
     includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
 
     repositories {
-        maven { url = uri("file:///home/hatch/local-m2") }
-    }
-
-    resolutionStrategy {
-        eachPlugin {
-            when (requested.id.id) {
-                "org.gradle.kotlin.kotlin-dsl" -> useModule("org.gradle.kotlin:gradle-kotlin-dsl-plugins:${requested.version}")
-                "com.android.application" -> useModule("com.android.tools.build:gradle:${requested.version}")
-                "org.jetbrains.kotlin.android" -> useModule("org.jetbrains.kotlin:kotlin-gradle-plugin:${requested.version}")
-            }
-        }
-    }
-}
-
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
-    repositories {
-        maven { url = uri("file:///home/hatch/local-m2") }
+        google()
+        mavenCentral()
+        gradlePluginPortal()
     }
 }
 
 plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
-    id("com.android.application") version "8.7.3" apply false
-    id("org.jetbrains.kotlin.android") version "1.9.20" apply false
+    id("com.android.application") version "8.7.0" apply false
+    id("org.jetbrains.kotlin.android") version "1.8.22" apply false
 }
 
 include(":app")

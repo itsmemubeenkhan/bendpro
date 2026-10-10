@@ -123,15 +123,37 @@ class _D {
 }
 
 /// Offset: two bends, dimension between marks + offset height.
+/// [offsetInches] drives the visual rise so the pipe moves while dragging.
 class OffsetDiagramPainter extends CustomPainter {
   final String distLabel;
   final String heightLabel;
-  OffsetDiagramPainter({required this.distLabel, required this.heightLabel});
+  final double offsetInches;
+  OffsetDiagramPainter({
+    required this.distLabel,
+    required this.heightLabel,
+    this.offsetInches = 6,
+  });
+
+  static const double baseY = 150.0;
+  static const double maxRisePx = 110.0;
+  static const double maxOffsetIn = 24.0;
+
+  /// Visual Y of the raised pipe for a given offset.
+  static double raisedY(double offsetIn) {
+    final frac = (offsetIn / maxOffsetIn).clamp(0.04, 1.0);
+    return baseY - frac * maxRisePx;
+  }
+
+  /// Inverse: drag Y position -> offset inches.
+  static double offsetFromDragY(double dragY) {
+    final frac = ((baseY - dragY) / maxRisePx).clamp(0.02, 1.0);
+    return (frac * maxOffsetIn).clamp(0.5, maxOffsetIn);
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width;
-    final y0 = 128.0, y1 = 74.0;
+    final y0 = baseY, y1 = raisedY(offsetInches);
     final m1x = w * 0.36, m2x = w * 0.64;
     _D.pipe(canvas, [Offset(14, y0), Offset(m1x, y0), Offset(m2x, y1), Offset(w - 14, y1)]);
     _D.dashed(canvas, Offset(m1x, y0), Offset(m2x, y0));
@@ -143,26 +165,45 @@ class OffsetDiagramPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant OffsetDiagramPainter old) =>
-      old.distLabel != distLabel || old.heightLabel != heightLabel;
+      old.distLabel != distLabel ||
+      old.heightLabel != heightLabel ||
+      old.offsetInches != offsetInches;
 }
 
 /// Rolling offset: offset pipe + rise/roll/true-offset triangle inset.
+/// [riseInches] drives the visual rise so the pipe moves while dragging.
 class RollingOffsetDiagramPainter extends CustomPainter {
   final String distLabel;
   final String riseLabel;
   final String rollLabel;
   final String trueLabel;
+  final double riseInches;
   RollingOffsetDiagramPainter({
     required this.distLabel,
     required this.riseLabel,
     required this.rollLabel,
     required this.trueLabel,
+    this.riseInches = 6,
   });
+
+  static const double baseY = 118.0;
+  static const double maxRisePx = 70.0;
+  static const double maxRiseIn = 24.0;
+
+  static double raisedY(double riseIn) {
+    final frac = (riseIn / maxRiseIn).clamp(0.04, 1.0);
+    return baseY - frac * maxRisePx;
+  }
+
+  static double riseFromDragY(double dragY) {
+    final frac = ((baseY - dragY) / maxRisePx).clamp(0.02, 1.0);
+    return (frac * maxRiseIn).clamp(0.5, maxRiseIn);
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width;
-    final y0 = 96.0, y1 = 52.0;
+    final y0 = baseY, y1 = raisedY(riseInches);
     final m1x = w * 0.38, m2x = w * 0.66;
     _D.pipe(canvas, [Offset(14, y0), Offset(m1x, y0), Offset(m2x, y1), Offset(w - 14, y1)]);
     _D.mark(canvas, Offset(m1x, y0), '1');
@@ -184,111 +225,175 @@ class RollingOffsetDiagramPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant RollingOffsetDiagramPainter old) =>
-      old.distLabel != distLabel || old.trueLabel != trueLabel;
+      old.distLabel != distLabel ||
+      old.trueLabel != trueLabel ||
+      old.riseInches != riseInches;
 }
 
 /// 90° stub-up: mark measured from the end, riser to finished height.
+/// [stubInches] drives the riser height so the pipe moves while dragging.
 class StubUpDiagramPainter extends CustomPainter {
   final String markLabel;
   final String stubLabel;
   final String deductLabel;
+  final double stubInches;
   StubUpDiagramPainter({
     required this.markLabel,
     required this.stubLabel,
     required this.deductLabel,
+    this.stubInches = 24,
   });
+
+  static const double baseY = 158.0;
+  static const double maxRisePx = 120.0;
+  static const double maxStubIn = 60.0;
+
+  static double topY(double stubIn) {
+    final frac = (stubIn / maxStubIn).clamp(0.05, 1.0);
+    return baseY - frac * maxRisePx;
+  }
+
+  static double stubFromDragY(double dragY) {
+    final frac = ((baseY - dragY) / maxRisePx).clamp(0.03, 1.0);
+    return (frac * maxStubIn).clamp(1, maxStubIn);
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width;
-    const endX = 16.0, bendX = 150.0, baseY = 138.0, topY = 34.0;
-    _D.pipe(canvas, [Offset(endX, baseY), Offset(bendX, baseY), Offset(bendX, topY)]);
-    _D.mark(canvas, Offset(bendX, baseY), 'mark');
-    _D.hDim(canvas, endX, bendX, baseY + 28, markLabel);
-    _D.vDim(canvas, topY, baseY, w - 30, stubLabel);
-    _D.text(canvas, 'deduct $deductLabel', Offset(bendX + 62, baseY - 26),
+    const endX = 16.0, bendX = 150.0;
+    final baseYv = baseY, topYv = topY(stubInches);
+    _D.pipe(canvas, [Offset(endX, baseYv), Offset(bendX, baseYv), Offset(bendX, topYv)]);
+    _D.mark(canvas, Offset(bendX, baseYv), 'mark');
+    _D.hDim(canvas, endX, bendX, baseYv + 28, markLabel);
+    _D.vDim(canvas, topYv, baseYv, w - 30, stubLabel);
+    _D.text(canvas, 'deduct $deductLabel', Offset(bendX + 62, baseYv - 26),
         size: 11, color: const Color(0xFFBDC1C6));
   }
 
   @override
   bool shouldRepaint(covariant StubUpDiagramPainter old) =>
-      old.markLabel != markLabel || old.stubLabel != stubLabel;
+      old.markLabel != markLabel ||
+      old.stubLabel != stubLabel ||
+      old.stubInches != stubInches;
 }
 
 /// Three-point saddle: A/C/B marks over a hatched obstruction.
+/// [depthInches] drives the peak height so the pipe moves while dragging.
 class ThreePointSaddlePainter extends CustomPainter {
   final String outerLabel;
   final String depthLabel;
-  ThreePointSaddlePainter({required this.outerLabel, required this.depthLabel});
+  final double depthInches;
+  ThreePointSaddlePainter({
+    required this.outerLabel,
+    required this.depthLabel,
+    this.depthInches = 4,
+  });
+
+  static const double baseY = 138.0;
+  static const double maxPeakPx = 72.0;
+  static const double maxDepthIn = 12.0;
+
+  static double peakY(double depthIn) {
+    final frac = (depthIn / maxDepthIn).clamp(0.06, 1.0);
+    return baseY - frac * maxPeakPx;
+  }
+
+  static double depthFromDragY(double dragY) {
+    final frac = ((baseY - dragY) / maxPeakPx).clamp(0.04, 1.0);
+    return (frac * maxDepthIn).clamp(0.5, maxDepthIn);
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width;
-    const baseY = 118.0, peakY = 66.0;
+    final baseYv = baseY, peakYv = peakY(depthInches);
     final cx = w / 2;
     final ax = cx - 62, bx = cx + 62;
     // Obstruction box under the peak.
-    _D.hatchRect(canvas, Rect.fromLTWH(cx - 42, baseY + 6, 84, 44));
-    _D.text(canvas, 'obstruction $depthLabel', Offset(cx, baseY + 66), size: 10.5);
+    _D.hatchRect(canvas, Rect.fromLTWH(cx - 42, baseYv + 6, 84, 44));
+    _D.text(canvas, 'obstruction $depthLabel', Offset(cx, baseYv + 66), size: 10.5);
     _D.pipe(canvas, [
-      Offset(14, baseY),
-      Offset(ax, baseY),
-      Offset(cx, peakY),
-      Offset(bx, baseY),
-      Offset(w - 14, baseY),
+      Offset(14, baseYv),
+      Offset(ax, baseYv),
+      Offset(cx, peakYv),
+      Offset(bx, baseYv),
+      Offset(w - 14, baseYv),
     ]);
-    _D.mark(canvas, Offset(ax, baseY), 'A');
-    _D.mark(canvas, Offset(cx, peakY), 'C');
-    _D.mark(canvas, Offset(bx, baseY), 'B');
+    _D.mark(canvas, Offset(ax, baseYv), 'A');
+    _D.mark(canvas, Offset(cx, peakYv), 'C');
+    _D.mark(canvas, Offset(bx, baseYv), 'B');
     _D.hDim(canvas, ax, bx, 26, outerLabel);
   }
 
   @override
   bool shouldRepaint(covariant ThreePointSaddlePainter old) =>
-      old.outerLabel != outerLabel || old.depthLabel != depthLabel;
+      old.outerLabel != outerLabel ||
+      old.depthLabel != depthLabel ||
+      old.depthInches != depthInches;
 }
 
 /// Four-point saddle: M1..M4 with per-segment spacing labels.
+/// [depthInches] drives the raised section so the pipe moves while dragging.
 class FourPointSaddlePainter extends CustomPainter {
   /// x positions of the four marks as fractions of width.
   final List<double> fx;
   final List<String> segLabels;
   final List<String> tags;
+  final double depthInches;
   FourPointSaddlePainter({
     required this.fx,
     required this.segLabels,
     this.tags = const ['M1', 'M2', 'M3', 'M4'],
+    this.depthInches = 4,
   });
+
+  static const double baseY = 132.0;
+  static const double maxUpPx = 64.0;
+  static const double maxDepthIn = 12.0;
+
+  static double upY(double depthIn) {
+    final frac = (depthIn / maxDepthIn).clamp(0.06, 1.0);
+    return baseY - frac * maxUpPx;
+  }
+
+  static double depthFromDragY(double dragY) {
+    final frac = ((baseY - dragY) / maxUpPx).clamp(0.04, 1.0);
+    return (frac * maxDepthIn).clamp(0.5, maxDepthIn);
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width;
-    const baseY = 112.0, upY = 66.0;
+    final baseYv = baseY, upYv = upY(depthInches);
     final xs = fx.map((f) => f * w).toList();
     _D.pipe(canvas, [
       const Offset(12, baseY),
-      Offset(xs[0], baseY),
-      Offset(xs[1], upY),
-      Offset(xs[2], upY),
-      Offset(xs[3], baseY),
-      Offset(w - 12, baseY),
+      Offset(xs[0], baseYv),
+      Offset(xs[1], upYv),
+      Offset(xs[2], upYv),
+      Offset(xs[3], baseYv),
+      Offset(w - 12, baseYv),
     ]);
     for (var i = 0; i < 4; i++) {
-      _D.mark(canvas, Offset(xs[i], i == 1 || i == 2 ? upY : baseY), tags[i]);
+      _D.mark(canvas, Offset(xs[i], i == 1 || i == 2 ? upYv : baseYv), tags[i]);
     }
     for (var i = 0; i < 3; i++) {
       _D.text(canvas, segLabels[i],
-          Offset((xs[i] + xs[i + 1]) / 2, baseY + 26),
+          Offset((xs[i] + xs[i + 1]) / 2, baseYv + 26),
           size: 11, color: _D.labelColor, bold: true);
     }
   }
 
   @override
   bool shouldRepaint(covariant FourPointSaddlePainter old) =>
-      old.segLabels.join() != segLabels.join() || old.fx.join() != fx.join();
+      old.segLabels.join() != segLabels.join() ||
+      old.fx.join() != fx.join() ||
+      old.depthInches != depthInches;
 }
 
 /// Kick: single bend near the end; mark distance + kick depth.
+/// Drag the pipe tip to change the bend angle.
 class KickDiagramPainter extends CustomPainter {
   final String markLabel;
   final String depthLabel;
@@ -299,16 +404,30 @@ class KickDiagramPainter extends CustomPainter {
     required this.angleDeg,
   });
 
+  static const double markX = 190.0;
+  static const double baseY = 148.0;
+  static const double armLen = 74.0;
+
+  /// Angle in degrees from a drag position relative to the bend mark.
+  static double angleFromDrag(Offset dragPos) {
+    final dx = dragPos.dx - markX;
+    final dy = baseY - dragPos.dy;
+    if (dx <= 4 && dy <= 4) return 30;
+    var deg = atan2(dy, dx) * 180 / pi;
+    return deg.clamp(10.0, 90.0);
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width;
-    const endX = 16.0, markX = 190.0, baseY = 128.0;
+    const endX = 16.0;
+    final markXv = markX, baseYv = baseY;
     final rad = angleDeg * pi / 180;
-    final tip = Offset(markX + 74 * cos(rad), baseY - 74 * sin(rad));
-    _D.pipe(canvas, [Offset(endX, baseY), Offset(markX, baseY), tip]);
-    _D.mark(canvas, Offset(markX, baseY), 'mark');
-    _D.hDim(canvas, endX, markX, baseY + 28, markLabel);
-    _D.vDim(canvas, tip.dy, baseY, min(tip.dx + 26, w - 24), depthLabel);
+    final tip = Offset(markXv + armLen * cos(rad), baseYv - armLen * sin(rad));
+    _D.pipe(canvas, [Offset(endX, baseYv), Offset(markXv, baseYv), tip]);
+    _D.mark(canvas, Offset(markXv, baseYv), 'mark');
+    _D.hDim(canvas, endX, markXv, baseYv + 28, markLabel);
+    _D.vDim(canvas, tip.dy, baseYv, min(tip.dx + 26, w - 24), depthLabel);
     _D.text(canvas, '${angleDeg == angleDeg.roundToDouble() ? angleDeg.toInt() : angleDeg}°',
         tip + const Offset(20, -16),
         size: 12, color: _D.labelColor, bold: true);
@@ -320,29 +439,51 @@ class KickDiagramPainter extends CustomPainter {
 }
 
 /// Double 90° (U-bend): two legs, spacing across the top.
+/// [legInches] drives the leg height so the pipe moves while dragging.
 class UBendDiagramPainter extends CustomPainter {
   final String legLabel;
   final String spacingLabel;
-  UBendDiagramPainter({required this.legLabel, required this.spacingLabel});
+  final double legInches;
+  UBendDiagramPainter({
+    required this.legLabel,
+    required this.spacingLabel,
+    this.legInches = 18,
+  });
+
+  static const double botY = 160.0;
+  static const double maxLegPx = 110.0;
+  static const double maxLegIn = 48.0;
+
+  static double topY(double legIn) {
+    final frac = (legIn / maxLegIn).clamp(0.08, 1.0);
+    return botY - frac * maxLegPx;
+  }
+
+  static double legFromDragY(double dragY) {
+    final frac = ((botY - dragY) / maxLegPx).clamp(0.05, 1.0);
+    return (frac * maxLegIn).clamp(2, maxLegIn);
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width;
     final x1 = w * 0.28, x2 = w * 0.72;
-    const topY = 52.0, botY = 150.0;
+    final topYv = topY(legInches), botYv = botY;
     _D.pipe(canvas, [
-      Offset(x1, botY),
-      Offset(x1, topY),
-      Offset(x2, topY),
-      Offset(x2, botY),
+      Offset(x1, botYv),
+      Offset(x1, topYv),
+      Offset(x2, topYv),
+      Offset(x2, botYv),
     ]);
-    _D.mark(canvas, Offset(x1, topY), 'A');
-    _D.mark(canvas, Offset(x2, topY), 'B');
-    _D.vDim(canvas, topY, botY, x1 - 34, legLabel);
+    _D.mark(canvas, Offset(x1, topYv), 'A');
+    _D.mark(canvas, Offset(x2, topYv), 'B');
+    _D.vDim(canvas, topYv, botYv, x1 - 34, legLabel);
     _D.hDim(canvas, x1, x2, 24, spacingLabel);
   }
 
   @override
   bool shouldRepaint(covariant UBendDiagramPainter old) =>
-      old.legLabel != legLabel || old.spacingLabel != spacingLabel;
+      old.legLabel != legLabel ||
+      old.spacingLabel != spacingLabel ||
+      old.legInches != legInches;
 }

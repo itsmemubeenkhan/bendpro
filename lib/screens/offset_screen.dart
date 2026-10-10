@@ -72,11 +72,21 @@ class _OffsetScreenState extends State<OffsetScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             fields,
-            DiagramCard(
+            DragDiagramCard(
               painter: OffsetDiagramPainter(
                 distLabel: AppUnits.format(dist, mode),
                 heightLabel: AppUnits.format(h!, mode),
+                offsetInches: h!,
               ),
+              onDrag: (pos, size) {
+                final v = OffsetDiagramPainter.offsetFromDragY(pos.dy);
+                // Snap to nearest 1/2" (or 1cm) for clean values.
+                final snapped = mode == MeasureMode.centimeters
+                    ? (v * AppUnits.inchToCm).roundToDouble() / AppUnits.inchToCm
+                    : (v * 2).round() / 2;
+                _heightCtrl.text = AppUnits.formatInput(snapped, mode);
+                setState(() {});
+              },
             ),
             const SizedBox(height: 12),
             ResultCard(

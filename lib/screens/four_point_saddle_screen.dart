@@ -91,7 +91,7 @@ class _FourPointSaddleScreenState extends State<FourPointSaddleScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             fields,
-            DiagramCard(
+            DragDiagramCard(
               painter: FourPointSaddlePainter(
                 fx: fx,
                 segLabels: [
@@ -99,7 +99,16 @@ class _FourPointSaddleScreenState extends State<FourPointSaddleScreen> {
                   AppUnits.format(ww, mode),
                   AppUnits.format(e, mode),
                 ],
+                depthInches: d!,
               ),
+              onDrag: (pos, size) {
+                final v = FourPointSaddlePainter.depthFromDragY(pos.dy);
+                final snapped = mode == MeasureMode.centimeters
+                    ? (v * AppUnits.inchToCm).roundToDouble() / AppUnits.inchToCm
+                    : (v * 2).round() / 2;
+                _depthCtrl.text = AppUnits.formatInput(snapped, mode);
+                setState(() {});
+              },
             ),
             const SizedBox(height: 12),
             Card(

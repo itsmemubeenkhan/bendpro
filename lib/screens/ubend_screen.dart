@@ -149,11 +149,21 @@ class _UBendScreenState extends State<UBendScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             fields,
-            DiagramCard(
+            DragDiagramCard(
               painter: UBendDiagramPainter(
                 legLabel: AppUnits.format(h!, mode),
                 spacingLabel: AppUnits.format(s!, mode),
+                legInches: h!,
               ),
+              onDrag: (pos, size) {
+                final v = UBendDiagramPainter.legFromDragY(pos.dy);
+                final snapped = mode == MeasureMode.centimeters
+                    ? (v * AppUnits.inchToCm).roundToDouble() / AppUnits.inchToCm
+                    : (v * 2).round() / 2;
+                // Update the leg height controller.
+                _heightCtrl.text = AppUnits.formatInput(snapped, mode);
+                setState(() {});
+              },
             ),
             const SizedBox(height: 12),
             ResultCard(

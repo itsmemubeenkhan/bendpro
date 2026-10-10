@@ -148,12 +148,21 @@ class _StubUpScreenState extends State<StubUpScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             fields,
-            DiagramCard(
+            DragDiagramCard(
               painter: StubUpDiagramPainter(
                 markLabel: AppUnits.format(mark!, mode),
                 stubLabel: AppUnits.format(h, mode),
                 deductLabel: AppUnits.format(deduct, mode),
+                stubInches: h,
               ),
+              onDrag: (pos, size) {
+                final v = StubUpDiagramPainter.stubFromDragY(pos.dy);
+                final snapped = mode == MeasureMode.centimeters
+                    ? (v * AppUnits.inchToCm).roundToDouble() / AppUnits.inchToCm
+                    : (v * 2).round() / 2;
+                _heightCtrl.text = AppUnits.formatInput(snapped, mode);
+                setState(() {});
+              },
             ),
             const SizedBox(height: 12),
             ResultCard(

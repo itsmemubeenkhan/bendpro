@@ -70,11 +70,20 @@ class _ThreePointSaddleScreenState extends State<ThreePointSaddleScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             fields,
-            DiagramCard(
+            DragDiagramCard(
               painter: ThreePointSaddlePainter(
                 outerLabel: AppUnits.format(outer!, mode),
                 depthLabel: AppUnits.format(d, mode),
+                depthInches: d,
               ),
+              onDrag: (pos, size) {
+                final v = ThreePointSaddlePainter.depthFromDragY(pos.dy);
+                final snapped = mode == MeasureMode.centimeters
+                    ? (v * AppUnits.inchToCm).roundToDouble() / AppUnits.inchToCm
+                    : (v * 2).round() / 2;
+                _depthCtrl.text = AppUnits.formatInput(snapped, mode);
+                setState(() {});
+              },
             ),
             const SizedBox(height: 12),
             ResultCard(

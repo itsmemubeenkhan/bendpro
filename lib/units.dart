@@ -119,6 +119,19 @@ class AppUnits {
     }
   }
 
+  /// Format an inch value as clean input-field text (no unit suffix),
+  /// e.g. 12.5 -> "12.5", or "30.5" in cm mode, or 1' 2 1/2" in ft-in mode.
+  static String formatInput(double inches, MeasureMode m) {
+    switch (m) {
+      case MeasureMode.inches:
+        return _trim(inches);
+      case MeasureMode.feetInches:
+        return toFeetInches(inches);
+      case MeasureMode.centimeters:
+        return _trim(inches * inchToCm);
+    }
+  }
+
   static String _trim(double v) {
     var s = v.toStringAsFixed(2);
     if (s.contains('.')) {

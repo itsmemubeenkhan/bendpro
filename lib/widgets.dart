@@ -395,3 +395,64 @@ class DiagramCard extends StatelessWidget {
     );
   }
 }
+
+/// Interactive diagram card: drag the pipe to change the bend.
+/// Reports drag position in the painter's local coordinates plus the
+/// rendered size, so screens can map pixels back to input values.
+class DragDiagramCard extends StatelessWidget {
+  final CustomPainter painter;
+  final double height;
+  final void Function(Offset localPos, Size size) onDrag;
+
+  const DragDiagramCard({
+    super.key,
+    required this.painter,
+    required this.onDrag,
+    this.height = 210,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
+              height: height,
+              width: double.infinity,
+              child: Builder(
+                builder: (ctx) => GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onPanStart: (d) => _handle(d.globalPosition, ctx),
+                  onPanUpdate: (d) => _handle(d.globalPosition, ctx),
+                  child: CustomPaint(painter: painter),
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.touch_app, size: 14, color: Colors.white38),
+                SizedBox(width: 6),
+                Text(
+                  'Drag the pipe to bend it',
+                  style: TextStyle(color: Colors.white38, fontSize: 12),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _handle(Offset global, BuildContext ctx) {
+    final box = ctx.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize) return;
+    onDrag(box.globalToLocal(global), box.size);
+  }
+}

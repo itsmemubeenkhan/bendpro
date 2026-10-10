@@ -85,13 +85,22 @@ class _RollingOffsetScreenState extends State<RollingOffsetScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             fields,
-            DiagramCard(
+            DragDiagramCard(
               painter: RollingOffsetDiagramPainter(
                 distLabel: AppUnits.format(dist, mode),
                 riseLabel: AppUnits.format(rise!, mode),
                 rollLabel: AppUnits.format(roll!, mode),
                 trueLabel: AppUnits.format(trueOffset!, mode),
+                riseInches: rise!,
               ),
+              onDrag: (pos, size) {
+                final v = RollingOffsetDiagramPainter.riseFromDragY(pos.dy);
+                final snapped = mode == MeasureMode.centimeters
+                    ? (v * AppUnits.inchToCm).roundToDouble() / AppUnits.inchToCm
+                    : (v * 2).round() / 2;
+                _riseCtrl.text = AppUnits.formatInput(snapped, mode);
+                setState(() {});
+              },
             ),
             const SizedBox(height: 12),
             ResultCard(

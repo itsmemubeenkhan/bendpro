@@ -72,12 +72,26 @@ class _KickScreenState extends State<KickScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             fields,
-            DiagramCard(
+            DragDiagramCard(
               painter: KickDiagramPainter(
                 markLabel: AppUnits.format(dist, mode),
                 depthLabel: AppUnits.format(d!, mode),
                 angleDeg: _angle,
               ),
+              onDrag: (pos, size) {
+                final raw = KickDiagramPainter.angleFromDrag(pos);
+                // Snap to the nearest standard bender angle.
+                double best = AppUnits.angles.first;
+                var bestDiff = (raw - best).abs();
+                for (final a in AppUnits.angles) {
+                  final diff = (raw - a).abs();
+                  if (diff < bestDiff) {
+                    bestDiff = diff;
+                    best = a;
+                  }
+                }
+                if (best != _angle) setState(() => _angle = best);
+              },
             ),
             const SizedBox(height: 12),
             ResultCard(

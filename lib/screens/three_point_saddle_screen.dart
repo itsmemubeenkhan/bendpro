@@ -98,7 +98,7 @@ class _ThreePointSaddleScreenState extends State<ThreePointSaddleScreen> {
                     const Text(
                       'MARK LAYOUT',
                       style: TextStyle(
-                        color: kAmber,
+                        color: kAccent,
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
                         letterSpacing: 0.8,
@@ -113,7 +113,7 @@ class _ThreePointSaddleScreenState extends State<ThreePointSaddleScreen> {
                     const Divider(height: 20, color: Colors.white12),
                     Row(
                       children: [
-                        const Icon(Icons.compress, color: kAmber, size: 18),
+                        const Icon(Icons.compress, color: kAccent, size: 18),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -157,7 +157,7 @@ class _ThreePointSaddleScreenState extends State<ThreePointSaddleScreen> {
               style: const TextStyle(color: Colors.white, fontSize: 14)),
           Text(value,
               style: const TextStyle(
-                  color: kAmber,
+                  color: kAccent,
                   fontSize: 14,
                   fontWeight: FontWeight.w600)),
         ],

@@ -114,7 +114,7 @@ class _FourPointSaddleScreenState extends State<FourPointSaddleScreen> {
                         const Text(
                           'MARK LAYOUT',
                           style: TextStyle(
-                            color: kAmber,
+                            color: kAccent,
                             fontWeight: FontWeight.bold,
                             fontSize: 13,
                             letterSpacing: 0.8,
@@ -123,7 +123,7 @@ class _FourPointSaddleScreenState extends State<FourPointSaddleScreen> {
                         IconButton(
                           tooltip: 'Save to history',
                           icon: const Icon(Icons.bookmark_add_outlined,
-                              color: kAmber),
+                              color: kAccent),
                           onPressed: () =>
                               HistoryStore.add('Four-Point Saddle', summary)
                                   .then((_) => ScaffoldMessenger.of(context)
@@ -178,7 +178,7 @@ class _FourPointSaddleScreenState extends State<FourPointSaddleScreen> {
               style: const TextStyle(color: Colors.white, fontSize: 14)),
           Text(value,
               style: const TextStyle(
-                  color: kAmber,
+                  color: kAccent,
                   fontSize: 14,
                   fontWeight: FontWeight.w600)),
         ],

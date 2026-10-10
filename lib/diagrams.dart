@@ -1,13 +1,13 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'widgets.dart' show kAmber;
+import 'widgets.dart' show kAccent;
 
 /// Original hand-drawn-style bend diagrams for each calculator.
 /// Every painter receives pre-formatted label strings so it stays dumb.
 
 class _D {
   static final pipePaint = Paint()
-    ..color = kAmber
+    ..color = kAccent
     ..strokeWidth = 9
     ..style = PaintingStyle.stroke
     ..strokeCap = StrokeCap.round
@@ -15,7 +15,7 @@ class _D {
 
   static final dimPaint = Paint()..color = const Color(0xFF9AA0A6)..strokeWidth = 1.2;
   static final arrowPaint = Paint()..color = const Color(0xFF9AA0A6);
-  static const labelColor = Color(0xFFFFB300);
+  static const labelColor = Color(0xFF2196F3);
 
   static void pipe(Canvas c, List<Offset> pts) {
     final path = Path()..moveTo(pts.first.dx, pts.first.dy);
@@ -47,9 +47,9 @@ class _D {
     tp.paint(c, Offset(at.dx - tp.width / 2, at.dy - tp.height / 2));
   }
 
-  /// Bend mark: amber dot with a number tag above it.
+  /// Bend mark: blue dot with a number tag above it.
   static void mark(Canvas c, Offset pt, String tag) {
-    c.drawCircle(pt, 7, Paint()..color = kAmber);
+    c.drawCircle(pt, 7, Paint()..color = kAccent);
     c.drawCircle(pt, 3, Paint()..color = Colors.black);
     text(c, tag, pt + const Offset(0, -24),
         size: 13, color: labelColor, bold: true);
@@ -175,7 +175,7 @@ class RollingOffsetDiagramPainter extends CustomPainter {
     canvas.drawLine(Offset(tx, ty), Offset(tx, ty - riseH), p);
     canvas.drawLine(Offset(tx, ty), Offset(tx + rollW, ty), p);
     canvas.drawLine(Offset(tx, ty - riseH), Offset(tx + rollW, ty),
-        Paint()..color = kAmber..strokeWidth = 1.8);
+        Paint()..color = kAccent..strokeWidth = 1.8);
     _D.text(canvas, riseLabel, Offset(tx - 24, ty - riseH / 2), size: 10.5);
     _D.text(canvas, rollLabel, Offset(tx + rollW / 2, ty + 13), size: 10.5);
     _D.text(canvas, 'true $trueLabel', Offset(tx + rollW / 2 + 8, ty - riseH / 2 - 12),

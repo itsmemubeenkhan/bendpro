@@ -180,7 +180,7 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Bender Profiles')),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: kAmber,
+        backgroundColor: kAccent,
         foregroundColor: Colors.black,
         tooltip: 'Add profile',
         onPressed: () => _edit(),
@@ -231,7 +231,7 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: active
-            ? const BorderSide(color: kAmber, width: 1.2)
+            ? const BorderSide(color: kAccent, width: 1.2)
             : BorderSide.none,
       ),
       child: InkWell(
@@ -248,7 +248,7 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
                     active
                         ? Icons.radio_button_checked
                         : Icons.radio_button_unchecked,
-                    color: active ? kAmber : Colors.white38,
+                    color: active ? kAccent : Colors.white38,
                     size: 20,
                   ),
                   const SizedBox(width: 10),

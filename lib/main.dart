@@ -8,7 +8,7 @@ class BendProApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const amber = Color(0xFFFFB300);
+    const accentBlue = Color(0xFF2196F3);
     return MaterialApp(
       title: 'BendPro - Conduit Calculator',
       debugShowCheckedModeBanner: false,
@@ -17,11 +17,11 @@ class BendProApp extends StatelessWidget {
         brightness: Brightness.dark,
         scaffoldBackgroundColor: const Color(0xFF14171B),
         colorScheme: ColorScheme.fromSeed(
-          seedColor: amber,
+          seedColor: accentBlue,
           brightness: Brightness.dark,
         ).copyWith(
-          primary: amber,
-          secondary: amber,
+          primary: accentBlue,
+          secondary: accentBlue,
           surface: const Color(0xFF1E2226),
         ),
         appBarTheme: const AppBarTheme(

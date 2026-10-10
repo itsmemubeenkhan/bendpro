@@ -98,7 +98,7 @@ class HomeScreen extends StatelessWidget {
           const Text(
             'Conduit Calculator',
             style: TextStyle(
-              color: kAmber,
+              color: kAccent,
               fontSize: 26,
               fontWeight: FontWeight.bold,
             ),
@@ -137,10 +137,10 @@ class HomeScreen extends StatelessWidget {
                           width: 46,
                           height: 46,
                           decoration: BoxDecoration(
-                            color: kAmber.withOpacity(0.15),
+                            color: kAccent.withOpacity(0.15),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Icon(c.icon, color: kAmber, size: 26),
+                          child: Icon(c.icon, color: kAccent, size: 26),
                         ),
                         const SizedBox(height: 12),
                         Text(

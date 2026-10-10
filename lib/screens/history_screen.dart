@@ -103,11 +103,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     width: 42,
                     height: 42,
                     decoration: BoxDecoration(
-                      color: kAmber.withOpacity(0.15),
+                      color: kAccent.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(Icons.calculate_outlined,
-                        color: kAmber, size: 22),
+                        color: kAccent, size: 22),
                   ),
                   title: Text(e.calc,
                       style: const TextStyle(

@@ -90,7 +90,7 @@ class _StubUpScreenState extends State<StubUpScreen> {
                 })),
                 IconButton(
                   tooltip: 'Manage bender profiles',
-                  icon: const Icon(Icons.settings_outlined, color: kAmber),
+                  icon: const Icon(Icons.settings_outlined, color: kAccent),
                   onPressed: () => Navigator.of(context)
                       .push(MaterialPageRoute(
                           builder: (_) => const ProfilesScreen()))
@@ -109,7 +109,7 @@ class _StubUpScreenState extends State<StubUpScreen> {
                   label: Text(s),
                   selected: isSel,
                   onSelected: (_) => setState(() => _size = s),
-                  selectedColor: kAmber,
+                  selectedColor: kAccent,
                   labelStyle: TextStyle(
                     color: isSel ? Colors.black : Colors.white,
                     fontWeight: FontWeight.w600,
@@ -188,7 +188,7 @@ class _StubUpScreenState extends State<StubUpScreen> {
       label: Text(label),
       selected: selected,
       onSelected: (_) => onTap(),
-      selectedColor: kAmber,
+      selectedColor: kAccent,
       labelStyle: TextStyle(
         color: selected ? Colors.black : Colors.white,
         fontWeight: FontWeight.w600,

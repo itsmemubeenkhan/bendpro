@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'units.dart';
 
-/// Shared building blocks: dark industrial styling, amber accents,
+/// Shared building blocks: dark industrial styling, blue accents,
 /// big readable results.
 
-const Color kAmber = Color(0xFFFFB300);
+const Color kAccent = Color(0xFF2196F3);
 const Color kCardBg = Color(0xFF1E2226);
 
 /// Page shell: title, measure-mode toggle in the app bar, scrollable body.
@@ -124,7 +124,7 @@ class LengthField extends StatelessWidget {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: kAmber, width: 1.5),
+            borderSide: const BorderSide(color: kAccent, width: 1.5),
           ),
         ),
       ),
@@ -144,7 +144,7 @@ class SectionLabel extends StatelessWidget {
       child: Text(
         text,
         style: const TextStyle(
-          color: kAmber,
+          color: kAccent,
           fontWeight: FontWeight.w600,
           fontSize: 13,
           letterSpacing: 0.6,
@@ -176,7 +176,7 @@ class AngleChips extends StatelessWidget {
           label: Text(AppUnits.angleLabel(a)),
           selected: isSel,
           onSelected: (_) => onSelected(a),
-          selectedColor: kAmber,
+          selectedColor: kAccent,
           labelStyle: TextStyle(
             color: isSel ? Colors.black : Colors.white,
             fontWeight: FontWeight.w600,
@@ -187,7 +187,7 @@ class AngleChips extends StatelessWidget {
   }
 }
 
-/// Big result card: headline number in amber, trade fraction underneath
+/// Big result card: headline number in blue, trade fraction underneath
 /// (inch modes), optional note, optional save-to-history button.
 class ResultCard extends StatelessWidget {
   final String label;
@@ -215,7 +215,7 @@ class ResultCard extends StatelessWidget {
       color: kCardBg,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: kAmber, width: 1.2),
+        side: const BorderSide(color: kAccent, width: 1.2),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
@@ -240,7 +240,7 @@ class ResultCard extends StatelessWidget {
                   IconButton(
                     tooltip: 'Save to history',
                     icon: const Icon(Icons.bookmark_add_outlined,
-                        color: kAmber),
+                        color: kAccent),
                     onPressed: onSave,
                   ),
               ],
@@ -249,7 +249,7 @@ class ResultCard extends StatelessWidget {
             Text(
               value,
               style: const TextStyle(
-                color: kAmber,
+                color: kAccent,
                 fontSize: 40,
                 fontWeight: FontWeight.bold,
               ),
@@ -296,7 +296,7 @@ class StepsCard extends StatelessWidget {
             Text(
               title,
               style: const TextStyle(
-                color: kAmber,
+                color: kAccent,
                 fontWeight: FontWeight.bold,
                 fontSize: 15,
               ),
@@ -312,7 +312,7 @@ class StepsCard extends StatelessWidget {
                         height: 26,
                         alignment: Alignment.center,
                         decoration: const BoxDecoration(
-                          color: kAmber,
+                          color: kAccent,
                           shape: BoxShape.circle,
                         ),
                         child: Text(
@@ -359,7 +359,7 @@ class HintCard extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Row(
           children: [
-            const Icon(Icons.info_outline, color: kAmber),
+            const Icon(Icons.info_outline, color: kAccent),
             const SizedBox(width: 12),
             Expanded(
               child: Text(

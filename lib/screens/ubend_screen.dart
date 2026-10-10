@@ -101,7 +101,7 @@ class _UBendScreenState extends State<UBendScreen> {
                     })),
                 IconButton(
                   tooltip: 'Manage bender profiles',
-                  icon: const Icon(Icons.settings_outlined, color: kAmber),
+                  icon: const Icon(Icons.settings_outlined, color: kAccent),
                   onPressed: () => Navigator.of(context)
                       .push(MaterialPageRoute(
                           builder: (_) => const ProfilesScreen()))
@@ -120,7 +120,7 @@ class _UBendScreenState extends State<UBendScreen> {
                   label: Text(sz),
                   selected: isSel,
                   onSelected: (_) => setState(() => _size = sz),
-                  selectedColor: kAmber,
+                  selectedColor: kAccent,
                   labelStyle: TextStyle(
                     color: isSel ? Colors.black : Colors.white,
                     fontWeight: FontWeight.w600,
@@ -190,7 +190,7 @@ class _UBendScreenState extends State<UBendScreen> {
       label: Text(label),
       selected: selected,
       onSelected: (_) => onTap(),
-      selectedColor: kAmber,
+      selectedColor: kAccent,
       labelStyle: TextStyle(
         color: selected ? Colors.black : Colors.white,
         fontWeight: FontWeight.w600,

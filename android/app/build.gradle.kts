@@ -18,7 +18,7 @@ android {
     namespace = "com.socialgeniex.bendpro"
     // Pinned to 34: the android-34 platform is installed in this environment.
     compileSdk = 34
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "26.0.10792818"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -39,10 +39,19 @@ android {
 
     signingConfigs {
         create("release") {
-            keyAlias = keystoreProperties["keyAlias"] as String
-            keyPassword = keystoreProperties["keyPassword"] as String
-            storeFile = file(keystoreProperties["storeFile"] as String)
-            storePassword = keystoreProperties["storePassword"] as String
+            val ksFile = keystoreProperties["storeFile"] as String?
+            if (ksFile != null && file(ksFile).exists()) {
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
+                storeFile = file(ksFile)
+                storePassword = keystoreProperties["storePassword"] as String
+            } else {
+                // Fall back to debug signing when no keystore is configured (CI/test builds)
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
+                storeFile = file("${System.getProperty("user.home")}/.android/debug.keystore")
+                storePassword = "android"
+            }
         }
     }
 

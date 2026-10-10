@@ -37,7 +37,7 @@ class BendProApp extends StatelessWidget {
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
-        bottomNavigationBarTheme: const BottomNavigationBarTheme(
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
           backgroundColor: ProTheme.surface,
           selectedItemColor: ProTheme.accent,
           unselectedItemColor: ProTheme.textDim,

@@ -66,7 +66,7 @@ class _ThreePointSaddleScreenState extends State<ThreePointSaddleScreen> {
                       : null,
                   onSave: () {
                     final summary =
-                        '3-pt saddle ${AppUnits.format(d, mode)} → outer ${AppUnits.format(outer, mode)} apart';
+                        '3-pt saddle ${AppUnits.format(d!, mode)} → outer ${AppUnits.format(outer, mode)} apart';
                     HistoryStore.add('Three-Point Saddle', summary).then(
                         (_) => ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(

@@ -487,3 +487,115 @@ class UBendDiagramPainter extends CustomPainter {
       old.spacingLabel != spacingLabel ||
       old.legInches != legInches;
 }
+
+/// Segmented 90° sweep: arc divided into equal shots with bend marks.
+class SegmentedBendPainter extends CustomPainter {
+  final int shots;
+  final String spacingLabel;
+  final String radiusLabel;
+  SegmentedBendPainter({
+    required this.shots,
+    required this.spacingLabel,
+    required this.radiusLabel,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    // Center of the arc at bottom-left area; radius fits the diagram.
+    final center = Offset(w * 0.30, 168.0);
+    const r = 118.0;
+    final n = shots.clamp(2, 12);
+    // Draw arc from 180° (pointing left) to 270° (pointing up) = 90° sweep.
+    final arcPaint = _D.pipePaint;
+    canvas.drawArc(Rect.fromCircle(center: center, radius: r), pi, pi / 2,
+        false, arcPaint);
+    // Straight lead-in and lead-out.
+    canvas.drawLine(Offset(center.dx - r - 46, center.dy),
+        Offset(center.dx - r, center.dy), _D.pipePaint);
+    canvas.drawLine(Offset(center.dx, center.dy - r - 34),
+        Offset(center.dx, center.dy - r), _D.pipePaint);
+    // Bend marks along the arc.
+    for (var i = 0; i <= n; i++) {
+      final a = pi + (pi / 2) * (i / n);
+      final pt = Offset(center.dx + r * cos(a), center.dy + r * sin(a));
+      _D.mark(canvas, pt, '${i + 1}');
+    }
+    _D.text(canvas, 'radius $radiusLabel', Offset(w - 70, 150),
+        size: 11, color: _D.labelColor, bold: true);
+    _D.text(canvas, '$n shots × $spacingLabel', Offset(w / 2, 22),
+        size: 11.5, color: _D.labelColor, bold: true);
+  }
+
+  @override
+  bool shouldRepaint(covariant SegmentedBendPainter old) =>
+      old.shots != shots || old.spacingLabel != spacingLabel;
+}
+
+/// Concentric 90° bends: nested bends for parallel conduit runs.
+class ConcentricBendPainter extends CustomPainter {
+  final int count;
+  final String spacingLabel;
+  ConcentricBendPainter({required this.count, required this.spacingLabel});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final n = count.clamp(2, 4);
+    const baseR = 56.0;
+    const step = 26.0;
+    final cx = w * 0.42, cy = 158.0;
+    for (var i = 0; i < n; i++) {
+      final r = baseR + i * step;
+      final paint = Paint()
+        ..color = i == 0 ? kAccent : const Color(0xFF5F6368)
+        ..strokeWidth = 7
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round;
+      // 90° arc from left to up.
+      canvas.drawArc(
+          Rect.fromCircle(center: Offset(cx, cy), radius: r), pi, pi / 2,
+          false, paint);
+      canvas.drawLine(Offset(cx - r - 30, cy), Offset(cx - r, cy), paint);
+      canvas.drawLine(Offset(cx, cy - r - 22), Offset(cx, cy - r), paint);
+      _D.text(canvas, '${i + 1}', Offset(cx - r - 40, cy - 14),
+          size: 11, color: _D.labelColor, bold: true);
+    }
+    _D.text(canvas, 'spacing $spacingLabel', Offset(w - 64, 30),
+        size: 11, color: _D.labelColor, bold: true);
+  }
+
+  @override
+  bool shouldRepaint(covariant ConcentricBendPainter old) =>
+      old.count != count || old.spacingLabel != spacingLabel;
+}
+
+/// Back-to-back 90s: two 90° bends with a straight section between.
+class BackToBackPainter extends CustomPainter {
+  final String betweenLabel;
+  final String legLabel;
+  BackToBackPainter({required this.betweenLabel, required this.legLabel});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final x1 = w * 0.30, x2 = w * 0.70;
+    const topY = 60.0, botY = 158.0;
+    _D.pipe(canvas, [
+      Offset(x1, botY),
+      Offset(x1, topY),
+      Offset(x2, topY),
+      Offset(x2, botY),
+    ]);
+    _D.mark(canvas, Offset(x1, topY), '1');
+    _D.mark(canvas, Offset(x2, topY), '2');
+    _D.hDim(canvas, x1, x2, 30, betweenLabel);
+    _D.vDim(canvas, topY, botY, x1 - 36, legLabel);
+    _D.text(canvas, 'bend 1 ↑ then flip → bend 2',
+        Offset(w / 2, botY + 24), size: 11);
+  }
+
+  @override
+  bool shouldRepaint(covariant BackToBackPainter old) =>
+      old.betweenLabel != betweenLabel || old.legLabel != legLabel;
+}

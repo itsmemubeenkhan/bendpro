@@ -7,6 +7,10 @@ import 'three_point_saddle_screen.dart';
 import 'four_point_saddle_screen.dart';
 import 'kick_screen.dart';
 import 'ubend_screen.dart';
+import 'segmented_screen.dart';
+import 'concentric_screen.dart';
+import 'backtoback_screen.dart';
+import 'shrink_screen.dart';
 import 'history_screen.dart';
 import 'profiles_screen.dart';
 
@@ -63,6 +67,30 @@ class HomeScreen extends StatelessWidget {
       'Up, across, and back down over an obstacle',
       Icons.u_turn_left,
       UBendScreen.new,
+    ),
+    _CalcInfo(
+      'Segmented 90°',
+      'Split a 90° into shots for a smooth sweep',
+      Icons.donut_large,
+      SegmentedScreen.new,
+    ),
+    _CalcInfo(
+      'Concentric 90°s',
+      'Parallel bends with even spacing',
+      Icons.filter_none,
+      ConcentricScreen.new,
+    ),
+    _CalcInfo(
+      'Back-to-Back 90s',
+      'Two 90° bends with a run between',
+      Icons.swap_vert,
+      BackToBackScreen.new,
+    ),
+    _CalcInfo(
+      'Shrink Chart',
+      'Pullback per inch of offset by angle',
+      Icons.table_chart,
+      ShrinkScreen.new,
     ),
   ];
 

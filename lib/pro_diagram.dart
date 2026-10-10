@@ -131,11 +131,13 @@ class ProPipe {
 
   /// Dimension line with arrows.
   static void dim(Canvas canvas, Offset a, Offset b, String text) {
+    final delta = b - a;
+    if (delta.distance < 1) return; // avoid divide-by-zero on zero-length dims
     final p = Paint()
       ..color = const Color(0xFF5F6B76)
       ..strokeWidth = 1.2;
     canvas.drawLine(a, b, p);
-    final dir = (b - a) / (b - a).distance;
+    final dir = delta / delta.distance;
     final perp = Offset(-dir.dy, dir.dx);
     for (final tip in [a, b]) {
       final d = tip == a ? dir : -dir;

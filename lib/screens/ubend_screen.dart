@@ -48,7 +48,7 @@ class _UBendScreenState extends State<UBendScreen> {
         final ready = markA != null && markA > 0 && s != null;
 
         return ProCalcScaffold(
-          title: 'Double 90° (U-Bend)',
+          title: 'Double 90°',
           inputBar: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

@@ -4,7 +4,23 @@ import 'screens/home_screen.dart';
 import 'screens/history_screen.dart';
 import 'screens/profiles_screen.dart';
 
-void main() => runApp(const BendProApp());
+void main() {
+  // Never show Flutter's gray crash screen — show a clean error instead.
+  ErrorWidget.builder = (FlutterErrorDetails details) => Material(
+        color: ProTheme.bg,
+        child: const Center(
+          child: Padding(
+            padding: EdgeInsets.all(32),
+            child: Text(
+              'Something went wrong drawing this screen.\nPlease go back and try again.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: ProTheme.textDim, height: 1.5),
+            ),
+          ),
+        ),
+      );
+  runApp(const BendProApp());
+}
 
 class BendProApp extends StatelessWidget {
   const BendProApp({super.key});

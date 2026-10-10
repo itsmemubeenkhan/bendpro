@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../pro_widgets.dart';
 import '../store.dart';
@@ -79,6 +80,12 @@ class _SegmentedScreenState extends State<SegmentedScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      // Segmented bend arc visualization.
+                      CustomPaint(
+                        size: const Size(200, 120),
+                        painter: _SegmentArcPainter(shots: _shots),
+                      ),
+                      const SizedBox(height: 8),
                       Text(
                         '${perShot.toStringAsFixed(1)}°',
                         style: const TextStyle(
@@ -126,4 +133,70 @@ class _SegmentedScreenState extends State<SegmentedScreen> {
       },
     );
   }
+}
+
+/// Segmented 90° arc: shows the bend divided into shot segments
+/// with a mark dot at each shot point.
+class _SegmentArcPainter extends CustomPainter {
+  final int shots;
+  _SegmentArcPainter({required this.shots});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final cx = size.width / 2;
+    final cy = size.height + 20;
+    const r = 110.0;
+    // Arc path for the conduit.
+    final path = Path();
+    for (var i = 0; i <= 40; i++) {
+      final a = pi - (i / 40) * pi / 2;
+      final p = Offset(cx + r * cos(a), cy - r * sin(a));
+      if (i == 0) {
+        path.moveTo(p.dx, p.dy);
+      } else {
+        path.lineTo(p.dx, p.dy);
+      }
+    }
+    // Metallic pipe.
+    canvas.drawPath(
+      path,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 14.5
+        ..strokeCap = StrokeCap.round
+        ..color = const Color(0xFF0D1117),
+    );
+    canvas.drawPath(
+      path,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 12
+        ..strokeCap = StrokeCap.round
+        ..color = const Color(0xFF9AA7B4),
+    );
+    // Shot marks.
+    for (var i = 0; i <= shots; i++) {
+      final a = pi - (i / shots) * pi / 2;
+      final p = Offset(cx + r * cos(a), cy - r * sin(a));
+      canvas.drawCircle(
+          p, 7, Paint()..color = ProTheme.accent.withOpacity(0.25));
+      canvas.drawCircle(p, 4.5, Paint()..color = ProTheme.accent);
+    }
+    // 90° label.
+    final tp = TextPainter(
+      text: const TextSpan(
+        text: '90°',
+        style: TextStyle(
+            color: ProTheme.textDim,
+            fontSize: 13,
+            fontWeight: FontWeight.bold),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    tp.paint(canvas, Offset(cx - tp.width / 2, cy - r - 24));
+  }
+
+  @override
+  bool shouldRepaint(covariant _SegmentArcPainter old) =>
+      old.shots != shots;
 }

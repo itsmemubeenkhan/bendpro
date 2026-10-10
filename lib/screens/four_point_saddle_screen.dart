@@ -37,7 +37,7 @@ class _FourPointSaddleScreenState extends State<FourPointSaddleScreen> {
         final m4 = ready ? 2 * each! + w! : null;
 
         return ProCalcScaffold(
-          title: 'Four-Point Saddle',
+          title: '4-Point Saddle',
           inputBar: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

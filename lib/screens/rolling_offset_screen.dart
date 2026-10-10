@@ -142,7 +142,7 @@ class _RollingPainter extends CustomPainter {
     ProPipe.mark(canvas, Offset(m1x, y0), '1');
     ProPipe.mark(canvas, Offset(m2x, y1), '2');
     ProPipe.dim(canvas, Offset(m1x, 28), Offset(m2x, 28), distLabel);
-    ProPipe.dim(canvas, Offset(w - 30, y1), Offset(w - 30, y0), riseLabel);
+    ProPipe.dim(canvas, Offset(w - 44, y1), Offset(w - 44, y0), riseLabel);
     ProPipe.label(canvas, 'drag pipe ↕', Offset(w / 2, size.height - 16),
         size: 11, color: ProTheme.textDim);
   }

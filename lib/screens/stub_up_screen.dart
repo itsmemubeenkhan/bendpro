@@ -53,7 +53,7 @@ class _StubUpScreenState extends State<StubUpScreen> {
         final valid = mark != null && mark > 0;
 
         return ProCalcScaffold(
-          title: '90° Stub-Up',
+          title: 'Stub-Up',
           inputBar: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

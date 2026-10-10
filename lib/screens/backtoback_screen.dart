@@ -47,7 +47,7 @@ class _BackToBackScreenState extends State<BackToBackScreen> {
         final ready = mark1 != null && mark1 > 0 && between != null;
 
         return ProCalcScaffold(
-          title: 'Back-to-Back 90s',
+          title: 'Back-to-Back',
           inputBar: Row(
             children: [
               Expanded(

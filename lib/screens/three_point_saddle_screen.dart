@@ -32,7 +32,7 @@ class _ThreePointSaddleScreenState extends State<ThreePointSaddleScreen> {
         final half = outer == null ? null : outer / 2;
 
         return ProCalcScaffold(
-          title: 'Three-Point Saddle',
+          title: '3-Point Saddle',
           inputBar: ProLengthInput(
             label: 'Obstruction depth',
             controller: _depthCtrl,

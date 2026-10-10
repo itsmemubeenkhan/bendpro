@@ -33,7 +33,7 @@ class _KickScreenState extends State<KickScreen> {
         final dist = d == null ? null : d * m;
 
         return ProCalcScaffold(
-          title: 'Kick (90°)',
+          title: 'Kick',
           inputBar: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

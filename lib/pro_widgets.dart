@@ -72,20 +72,27 @@ class ProUnitToggle extends StatelessWidget {
     return ValueListenableBuilder<MeasureMode>(
       valueListenable: AppUnits.mode,
       builder: (context, mode, _) => Padding(
-        padding: const EdgeInsets.only(right: 12),
+        padding: const EdgeInsets.only(right: 8),
         child: Center(
           child: SegmentedButton<MeasureMode>(
             segments: const [
-              ButtonSegment(value: MeasureMode.inches, label: Text('in')),
-              ButtonSegment(value: MeasureMode.feetInches, label: Text('ft')),
               ButtonSegment(
-                  value: MeasureMode.centimeters, label: Text('cm')),
+                  value: MeasureMode.inches,
+                  label: Text('in', style: TextStyle(fontSize: 12))),
+              ButtonSegment(
+                  value: MeasureMode.feetInches,
+                  label: Text('ft', style: TextStyle(fontSize: 12))),
+              ButtonSegment(
+                  value: MeasureMode.centimeters,
+                  label: Text('cm', style: TextStyle(fontSize: 12))),
             ],
             selected: {mode},
             onSelectionChanged: (s) => AppUnits.mode.value = s.first,
             style: SegmentedButton.styleFrom(
-              visualDensity: VisualDensity.compact,
+              visualDensity:
+                  const VisualDensity(horizontal: -3, vertical: -3),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              side: const BorderSide(color: ProTheme.border),
             ),
           ),
         ),

@@ -17,7 +17,7 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace = "com.socialgeniex.bendpro"
     // Pinned to 34: the android-34 platform is installed in this environment.
-    compileSdk = 34
+    compileSdk = 36
     ndkVersion = "26.0.10792818"
 
     compileOptions {
@@ -32,7 +32,7 @@ android {
     defaultConfig {
         applicationId = "com.socialgeniex.bendpro"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }

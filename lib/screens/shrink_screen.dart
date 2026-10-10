@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
-import '../store.dart';
+import '../pro_widgets.dart';
 import '../units.dart';
-import '../widgets.dart';
 
-/// Shrink reference: how much a bend pulls the run back, per inch of
-/// offset, for every standard bender angle. The numbers off the handle.
+/// Shrink Chart — pro layout (reference table).
 class ShrinkScreen extends StatelessWidget {
   const ShrinkScreen({super.key});
 
-  /// Shrink per inch of offset for standard angles (multiplier − cosecant
-  /// relationship reduced to the trade table values). (Non-const: double keys
-  /// are not allowed in const maps.)
   static final Map<double, double> shrinkPerInch = {
     10: 0.06,
     15: 0.11,
@@ -22,117 +17,88 @@ class ShrinkScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CalcScaffold(
-      title: 'Shrink Chart',
-      subtitle:
-          'How much each bend pulls your run back — per inch of offset, by angle.',
-      builder: (context, mode) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const HintCard(
-                'Shrink = offset × the factor below. Start your first mark that far before the measured point.'),
-            const SizedBox(height: 12),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'SHRINK PER INCH OF OFFSET',
+    return ValueListenableBuilder<MeasureMode>(
+      valueListenable: AppUnits.mode,
+      builder: (context, mode, _) {
+        return Scaffold(
+          backgroundColor: ProTheme.bg,
+          appBar: AppBar(
+            backgroundColor: ProTheme.bg,
+            elevation: 0,
+            title: const Text('Shrink Chart',
+                style:
+                    TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            actions: const [ProUnitToggle()],
+          ),
+          body: SafeArea(
+            child: ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: shrinkPerInch.length + 1,
+              separatorBuilder: (_, __) => const SizedBox(height: 8),
+              itemBuilder: (context, i) {
+                if (i == 0) {
+                  return const Padding(
+                    padding: EdgeInsets.only(bottom: 4),
+                    child: Text(
+                      'Pullback per inch of offset — start your first mark this far early.',
                       style: TextStyle(
-                        color: kAccent,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                        letterSpacing: 0.8,
-                      ),
+                          color: ProTheme.textDim, fontSize: 14),
                     ),
-                    const SizedBox(height: 12),
-                    ...shrinkPerInch.entries.map((e) {
-                      final perInch = e.value;
-                      final perInchDisplay = mode == MeasureMode.centimeters
-                          ? '${(perInch * AppUnits.inchToCm).toStringAsFixed(2)} cm/cm'
-                          : '${perInch.toStringAsFixed(2)}"/in';
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  width: 52,
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 6, horizontal: 4),
-                                  decoration: BoxDecoration(
-                                    color: kAccent.withOpacity(0.15),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    AppUnits.angleLabel(e.key),
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      color: kAccent,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 15,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Text(
-                                  '× ${AppUnits.multLabel(AppUnits.multipliers[e.key]!)} mult',
-                                  style: const TextStyle(
-                                      color: Colors.white70, fontSize: 13),
-                                ),
-                              ],
-                            ),
-                            Text(
-                              perInchDisplay,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
+                  );
+                }
+                final e = shrinkPerInch.entries.elementAt(i - 1);
+                final display = mode == MeasureMode.centimeters
+                    ? '${(e.value * 2.54).toStringAsFixed(2)} cm'
+                    : '${e.value.toStringAsFixed(2)}"';
+                return Container(
+                  decoration: BoxDecoration(
+                    color: ProTheme.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: ProTheme.border),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 14),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 64,
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                          color: ProTheme.accent.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                      );
-                    }),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text(
-                      'HOW TO USE IT',
-                      style: TextStyle(
-                        color: kAccent,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                        letterSpacing: 0.8,
+                        child: Text(
+                          AppUnits.angleLabel(e.key),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: ProTheme.accent,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 17,
+                          ),
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 10),
-                    Text(
-                      '1. Measure where the bend should land.\n'
-                      '2. Multiply your offset by the shrink factor.\n'
-                      '3. Make your first mark that far BEFORE the measured point.\n'
-                      '4. The bend will pull the conduit back exactly onto your mark.',
-                      style: TextStyle(
-                          color: Colors.white70, fontSize: 14, height: 1.6),
-                    ),
-                  ],
-                ),
-              ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Text(
+                          '× ${AppUnits.multLabel(AppUnits.multipliers[e.key]!)} multiplier',
+                          style: const TextStyle(
+                              color: ProTheme.textDim, fontSize: 13),
+                        ),
+                      ),
+                      Text(
+                        display,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
-          ],
+          ),
         );
       },
     );

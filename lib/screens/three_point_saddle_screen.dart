@@ -1,16 +1,10 @@
 import 'package:flutter/material.dart';
-import '../diagrams.dart';
+import '../pro_diagram.dart';
+import '../pro_widgets.dart';
 import '../store.dart';
 import '../units.dart';
-import '../widgets.dart';
 
-/// Three-point saddle: jump over an obstruction with three bends —
-/// a 45° center bend and two 22.5° outer bends.
-///
-/// Math (standard 45° saddle):
-///   distance between the two outer marks = obstruction depth × 2.5
-///   center mark sits exactly in the middle
-///   shrink (run pulls back) = depth × 3/16 (0.1875) per inch of depth
+/// Three-Point Saddle — pro layout with drag-to-adjust depth.
 class ThreePointSaddleScreen extends StatefulWidget {
   const ThreePointSaddleScreen({super.key});
 
@@ -20,7 +14,7 @@ class ThreePointSaddleScreen extends StatefulWidget {
 }
 
 class _ThreePointSaddleScreenState extends State<ThreePointSaddleScreen> {
-  final _depthCtrl = TextEditingController();
+  final _depthCtrl = TextEditingController(text: '4');
 
   @override
   void dispose() {
@@ -30,147 +24,103 @@ class _ThreePointSaddleScreenState extends State<ThreePointSaddleScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return CalcScaffold(
-      title: 'Three-Point Saddle',
-      subtitle:
-          'Three bends that hop the conduit over an obstruction and bring it back parallel — 45° in the middle, 22.5° on each side.',
-      builder: (context, mode) {
+    return ValueListenableBuilder<MeasureMode>(
+      valueListenable: AppUnits.mode,
+      builder: (context, mode, _) {
         final d = AppUnits.parseInput(_depthCtrl.text, mode);
         final outer = d == null ? null : d * 2.5;
         final half = outer == null ? null : outer / 2;
-        final shrink = d == null ? null : d * 0.1875;
 
-        final fields = Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            LengthField(
-              label: 'Obstruction depth',
-              controller: _depthCtrl,
-              mode: mode,
-              onChanged: () => setState(() {}),
-            ),
-            const SizedBox(height: 4),
-          ],
-        );
-
-        if (d == null) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              fields,
-              const HintCard(
-                  'Enter the obstruction depth to lay out the three marks.'),
-            ],
-          );
-        }
-
-        final summary =
-            '3-pt saddle depth ${AppUnits.format(d, mode)} → outer marks ${AppUnits.format(outer!, mode)} apart';
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            fields,
-            DragDiagramCard(
-              painter: ThreePointSaddlePainter(
-                outerLabel: AppUnits.format(outer!, mode),
-                depthLabel: AppUnits.format(d, mode),
-                depthInches: d,
-              ),
-              onDrag: (pos, size) {
-                final v = ThreePointSaddlePainter.depthFromDragY(pos.dy);
-                final snapped = mode == MeasureMode.centimeters
-                    ? (v * AppUnits.inchToCm).roundToDouble() / AppUnits.inchToCm
-                    : (v * 2).round() / 2;
-                _depthCtrl.text = AppUnits.formatInput(snapped, mode);
-                setState(() {});
-              },
-            ),
-            const SizedBox(height: 12),
-            ResultCard(
-              label: 'Distance between outer marks',
-              value: AppUnits.format(outer!, mode),
-              inchesValue: outer!,
-              mode: mode,
-              note: '${AppUnits.format(d, mode)} depth × 2.5 (45° saddle)',
-              onSave: () =>
-                  HistoryStore.add('Three-Point Saddle', summary).then(
-                      (_) => ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Saved to history')))),
-            ),
-            const SizedBox(height: 12),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'MARK LAYOUT',
-                      style: TextStyle(
-                        color: kAccent,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                        letterSpacing: 0.8,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    _markRow('Mark A — first outer bend', 'start (0)'),
-                    _markRow('Mark C — center bend (45°)',
-                        AppUnits.format(half!, mode)),
-                    _markRow('Mark B — second outer bend',
-                        AppUnits.format(outer!, mode)),
-                    const Divider(height: 20, color: Colors.white12),
-                    Row(
-                      children: [
-                        const Icon(Icons.compress, color: kAccent, size: 18),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Shrink: the run pulls back ${AppUnits.format(shrink!, mode)} — start Mark A that far before your measured point.',
-                            style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 13,
-                                height: 1.4),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+        return ProCalcScaffold(
+          title: 'Three-Point Saddle',
+          inputBar: ProLengthInput(
+            label: 'Obstruction depth',
+            controller: _depthCtrl,
+            mode: mode,
+            onChanged: () => setState(() {}),
+          ),
+          body: d == null
+              ? const Center(
+                  child: Text('Enter obstruction depth',
+                      style: TextStyle(color: ProTheme.textDim)))
+              : ProDragDiagram(
+                  painter: _SaddlePainter(
+                    depthIn: d,
+                    outerLabel: AppUnits.format(outer!, mode),
+                  ),
+                  onDragY: (dy, size) {
+                    final frac = ((138 - dy) / 72).clamp(0.04, 1.0);
+                    var v = (frac * 12).clamp(0.5, 12.0);
+                    v = (v * 2).round() / 2;
+                    _depthCtrl.text = AppUnits.formatInput(v, mode);
+                    setState(() {});
+                  },
                 ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            StepsCard(
-              title: 'Marking steps',
-              steps: [
-                'Find the center of the obstruction, transfer it to the conduit, and mark it C.',
-                'Measure ${AppUnits.format(half!, mode)} each way from C and mark the outer bends A and B.',
-                'Bend the center mark C to 45° first.',
-                'Bend A and B to 22.5° each, in the opposite direction of the center bend.',
-                'Lay it over the obstruction and check the fit — allow ${AppUnits.format(shrink!, mode)} of shrink in your layout.',
-              ],
-            ),
-          ],
+          resultBar: outer == null
+              ? const ProResultBar(label: 'Outer marks apart', value: '—')
+              : ProResultBar(
+                  label: 'Outer marks apart',
+                  value: AppUnits.format(outer, mode),
+                  fraction: (mode != MeasureMode.centimeters)
+                      ? AppUnits.fraction(outer)
+                      : null,
+                  onSave: () {
+                    final summary =
+                        '3-pt saddle ${AppUnits.format(d, mode)} → outer ${AppUnits.format(outer, mode)} apart';
+                    HistoryStore.add('Three-Point Saddle', summary).then(
+                        (_) => ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('Saved to history'))));
+                  },
+                  onSteps: () => showStepsSheet(context, 'Marking steps', [
+                    'Center the obstruction, mark C on the conduit.',
+                    'Measure ${AppUnits.format(half!, mode)} each way — mark A and B.',
+                    'Bend center C to 45° first.',
+                    'Bend A and B to 22.5° each, opposite direction.',
+                  ]),
+                ),
         );
       },
     );
   }
+}
 
-  Widget _markRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label,
-              style: const TextStyle(color: Colors.white, fontSize: 14)),
-          Text(value,
-              style: const TextStyle(
-                  color: kAccent,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600)),
-        ],
-      ),
-    );
+class _SaddlePainter extends CustomPainter {
+  final double depthIn;
+  final String outerLabel;
+  _SaddlePainter({required this.depthIn, required this.outerLabel});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    const baseY = 138.0;
+    final frac = (depthIn / 12).clamp(0.06, 1.0);
+    final peakY = baseY - frac * 72;
+    final cx = w / 2, ax = cx - 62, bx = cx + 62;
+    // Obstruction.
+    final r = Rect.fromLTWH(cx - 42, baseY + 8, 84, 40);
+    canvas.drawRect(r, Paint()..color = const Color(0xFF2A3138));
+    canvas.drawRect(
+        r,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..color = const Color(0xFF5F6B76));
+    ProPipe.draw(canvas, [
+      Offset(14, baseY),
+      Offset(ax, baseY),
+      Offset(cx, peakY),
+      Offset(bx, baseY),
+      Offset(w - 14, baseY),
+    ]);
+    ProPipe.mark(canvas, Offset(ax, baseY), 'A');
+    ProPipe.mark(canvas, Offset(cx, peakY), 'C');
+    ProPipe.mark(canvas, Offset(bx, baseY), 'B');
+    ProPipe.dim(canvas, Offset(ax, 26), Offset(bx, 26), outerLabel);
+    ProPipe.label(canvas, 'drag peak ↕', Offset(w / 2, size.height - 16),
+        size: 11, color: ProTheme.textDim);
   }
+
+  @override
+  bool shouldRepaint(covariant _SaddlePainter old) =>
+      old.depthIn != depthIn || old.outerLabel != outerLabel;
 }

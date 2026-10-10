@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import '../diagrams.dart';
+import '../pro_bender.dart';
+import '../pro_widgets.dart';
 import '../store.dart';
 import '../units.dart';
-import '../widgets.dart';
 
-/// Kick (a single bend): moves the end of the conduit off the mounting
-/// surface by the kick depth.
-///
-/// Math: mark distance from the end = kick depth × multiplier(angle),
-/// then bend once to the chosen angle with the bender arrow on the mark.
+/// Kick — pro layout: depth input, interactive bender for angle,
+/// pinned result bar. No scrolling.
 class KickScreen extends StatefulWidget {
   const KickScreen({super.key});
 
@@ -17,7 +14,7 @@ class KickScreen extends StatefulWidget {
 }
 
 class _KickScreenState extends State<KickScreen> {
-  final _depthCtrl = TextEditingController();
+  final _depthCtrl = TextEditingController(text: '4');
   double _angle = 30;
 
   @override
@@ -28,94 +25,58 @@ class _KickScreenState extends State<KickScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return CalcScaffold(
-      title: 'Kick (90°)',
-      subtitle:
-          'A single bend near the end of the conduit that kicks it off the mounting surface by the depth you need.',
-      builder: (context, mode) {
+    return ValueListenableBuilder<MeasureMode>(
+      valueListenable: AppUnits.mode,
+      builder: (context, mode, _) {
         final d = AppUnits.parseInput(_depthCtrl.text, mode);
         final m = AppUnits.multipliers[_angle]!;
         final dist = d == null ? null : d * m;
 
-        final fields = Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            LengthField(
-              label: 'Kick depth',
-              controller: _depthCtrl,
-              mode: mode,
-              onChanged: () => setState(() {}),
-            ),
-            const SectionLabel('BEND ANGLE'),
-            AngleChips(
-              selected: _angle,
-              onSelected: (a) => setState(() => _angle = a),
-            ),
-            const SizedBox(height: 16),
-          ],
-        );
-
-        if (dist == null) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+        return ProCalcScaffold(
+          title: 'Kick (90°)',
+          inputBar: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              fields,
-              const HintCard(
-                  'Enter the kick depth to find where to mark the bend.'),
-            ],
-          );
-        }
-
-        final summary =
-            'Kick ${AppUnits.format(d!, mode)} @ ${AppUnits.angleLabel(_angle)} → mark ${AppUnits.format(dist, mode)} from end';
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            fields,
-            DragDiagramCard(
-              painter: KickDiagramPainter(
-                markLabel: AppUnits.format(dist, mode),
-                depthLabel: AppUnits.format(d!, mode),
-                angleDeg: _angle,
+              ProLengthInput(
+                label: 'Kick depth',
+                controller: _depthCtrl,
+                mode: mode,
+                onChanged: () => setState(() {}),
               ),
-              onDrag: (pos, size) {
-                final raw = KickDiagramPainter.angleFromDrag(pos);
-                // Snap to the nearest standard bender angle.
-                double best = AppUnits.angles.first;
-                var bestDiff = (raw - best).abs();
-                for (final a in AppUnits.angles) {
-                  final diff = (raw - a).abs();
-                  if (diff < bestDiff) {
-                    bestDiff = diff;
-                    best = a;
-                  }
-                }
-                if (best != _angle) setState(() => _angle = best);
-              },
-            ),
-            const SizedBox(height: 12),
-            ResultCard(
-              label: 'Mark distance from the end',
-              value: AppUnits.format(dist, mode),
-              inchesValue: dist,
-              mode: mode,
-              note:
-                  '${AppUnits.format(d!, mode)} kick × multiplier ${AppUnits.multLabel(m)}',
-              onSave: () => HistoryStore.add('Kick', summary).then(
-                  (_) => ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Saved to history')))),
-            ),
-            const SizedBox(height: 12),
-            StepsCard(
-              title: 'Marking steps',
-              steps: [
-                'Measure ${AppUnits.format(dist, mode)} from the end of the conduit and mark it.',
-                'Set the bender arrow exactly on the mark.',
-                'Pull the bend to ${AppUnits.angleLabel(_angle)}, keeping the conduit flat in the bender.',
-                'Check the kick — the end should sit ${AppUnits.format(d!, mode)} off the surface.',
-              ],
-            ),
-          ],
+              const SizedBox(height: 10),
+              ProAngleChips(
+                selected: _angle,
+                onSelected: (a) => setState(() => _angle = a),
+              ),
+            ],
+          ),
+          body: ProBender(
+            angleDeg: _angle,
+            onAngleChanged: (a) => setState(() => _angle = a),
+          ),
+          resultBar: dist == null
+              ? const ProResultBar(label: 'Mark from the end', value: '—')
+              : ProResultBar(
+                  label: 'Mark from the end',
+                  value: AppUnits.format(dist, mode),
+                  fraction: (mode != MeasureMode.centimeters)
+                      ? AppUnits.fraction(dist)
+                      : null,
+                  onSave: () {
+                    final summary =
+                        'Kick ${AppUnits.format(d!, mode)} @ ${AppUnits.angleLabel(_angle)} → mark ${AppUnits.format(dist, mode)} from end';
+                    HistoryStore.add('Kick', summary).then((_) =>
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('Saved to history'))));
+                  },
+                  onSteps: () => showStepsSheet(context, 'Marking steps', [
+                    'Measure ${AppUnits.format(dist, mode)} from the end and mark it.',
+                    'Set the bender arrow exactly on the mark.',
+                    'Pull the bend to ${AppUnits.angleLabel(_angle)}, keeping the conduit flat.',
+                    'Check the kick — the end should sit ${AppUnits.format(d!, mode)} off the surface.',
+                  ]),
+                ),
         );
       },
     );

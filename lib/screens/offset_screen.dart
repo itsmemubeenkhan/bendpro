@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import '../diagrams.dart';
+import '../pro_bender.dart';
+import '../pro_widgets.dart';
 import '../store.dart';
 import '../units.dart';
-import '../widgets.dart';
 
-/// Offset bend: two equal bends that shift the conduit around an obstacle
-/// while keeping it parallel to the original run.
-///
-/// Math: distance between bend marks = offset height × multiplier,
-/// where multiplier = 1 / sin(angle).
+/// Offset bend — pro layout: compact input, interactive bender,
+/// pinned result bar. No scrolling.
 class OffsetScreen extends StatefulWidget {
   const OffsetScreen({super.key});
 
@@ -17,7 +14,7 @@ class OffsetScreen extends StatefulWidget {
 }
 
 class _OffsetScreenState extends State<OffsetScreen> {
-  final _heightCtrl = TextEditingController();
+  final _heightCtrl = TextEditingController(text: '6');
   double _angle = 30;
 
   @override
@@ -28,90 +25,61 @@ class _OffsetScreenState extends State<OffsetScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return CalcScaffold(
-      title: 'Offset Bend',
-      subtitle:
-          'Two equal bends that move the conduit around an obstacle while keeping it parallel to the run.',
-      builder: (context, mode) {
+    return ValueListenableBuilder<MeasureMode>(
+      valueListenable: AppUnits.mode,
+      builder: (context, mode, _) {
         final h = AppUnits.parseInput(_heightCtrl.text, mode);
         final m = AppUnits.multipliers[_angle]!;
         final dist = h == null ? null : h * m;
 
-        final fields = Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            LengthField(
-              label: 'Offset height',
-              controller: _heightCtrl,
-              mode: mode,
-              onChanged: () => setState(() {}),
-            ),
-            const SectionLabel('BEND ANGLE'),
-            AngleChips(
-              selected: _angle,
-              onSelected: (a) => setState(() => _angle = a),
-            ),
-            const SizedBox(height: 16),
-          ],
-        );
-
-        if (dist == null) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+        return ProCalcScaffold(
+          title: 'Offset Bend',
+          inputBar: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              fields,
-              const HintCard(
-                  'Enter the offset height above to get the mark spacing.'),
-            ],
-          );
-        }
-
-        final summary =
-            'Offset ${AppUnits.format(h!, mode)} @ ${AppUnits.angleLabel(_angle)} → marks ${AppUnits.format(dist, mode)} apart';
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            fields,
-            DragDiagramCard(
-              painter: OffsetDiagramPainter(
-                distLabel: AppUnits.format(dist, mode),
-                heightLabel: AppUnits.format(h!, mode),
-                offsetInches: h!,
+              ProLengthInput(
+                label: 'Offset height',
+                controller: _heightCtrl,
+                mode: mode,
+                onChanged: () => setState(() {}),
               ),
-              onDrag: (pos, size) {
-                final v = OffsetDiagramPainter.offsetFromDragY(pos.dy);
-                // Snap to nearest 1/2" (or 1cm) for clean values.
-                final snapped = mode == MeasureMode.centimeters
-                    ? (v * AppUnits.inchToCm).roundToDouble() / AppUnits.inchToCm
-                    : (v * 2).round() / 2;
-                _heightCtrl.text = AppUnits.formatInput(snapped, mode);
-                setState(() {});
-              },
-            ),
-            const SizedBox(height: 12),
-            ResultCard(
-              label: 'Distance between bend marks',
-              value: AppUnits.format(dist, mode),
-              inchesValue: dist,
-              mode: mode,
-              note:
-                  'Multiplier ${AppUnits.multLabel(m)} × ${AppUnits.format(h!, mode)} offset',
-              onSave: () => HistoryStore.add('Offset Bend', summary).then(
-                  (_) => ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Saved to history')))),
-            ),
-            const SizedBox(height: 12),
-            StepsCard(
-              title: 'Marking steps',
-              steps: [
-                'Mark 1 where the first bend begins.',
-                'Measure ${AppUnits.format(dist, mode)} from Mark 1 and make Mark 2.',
-                'Set the bender arrow on Mark 1 and bend to ${AppUnits.angleLabel(_angle)}.',
-                'Flip the conduit over, set the bender on Mark 2, and bend to ${AppUnits.angleLabel(_angle)} the opposite way.',
-                'Lay the conduit flat and check the offset — it should measure ${AppUnits.format(h!, mode)}.',
-              ],
-            ),
-          ],
+              const SizedBox(height: 10),
+              ProAngleChips(
+                selected: _angle,
+                onSelected: (a) => setState(() => _angle = a),
+              ),
+            ],
+          ),
+          body: ProBender(
+            angleDeg: _angle,
+            onAngleChanged: (a) => setState(() => _angle = a),
+          ),
+          resultBar: dist == null
+              ? const ProResultBar(
+                  label: 'Distance between marks',
+                  value: '—',
+                )
+              : ProResultBar(
+                  label: 'Distance between marks',
+                  value: AppUnits.format(dist, mode),
+                  fraction:
+                      (mode != MeasureMode.centimeters) ? AppUnits.fraction(dist) : null,
+                  onSave: () {
+                    final summary =
+                        'Offset ${AppUnits.format(h!, mode)} @ ${AppUnits.angleLabel(_angle)} → marks ${AppUnits.format(dist, mode)} apart';
+                    HistoryStore.add('Offset Bend', summary).then((_) =>
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('Saved to history'))));
+                  },
+                  onSteps: () => showStepsSheet(context, 'Marking steps', [
+                    'Mark 1 where the first bend begins.',
+                    'Measure ${AppUnits.format(dist, mode)} from Mark 1 and make Mark 2.',
+                    'Set the bender arrow on Mark 1 and bend to ${AppUnits.angleLabel(_angle)}.',
+                    'Flip the conduit over, set the bender on Mark 2, and bend to ${AppUnits.angleLabel(_angle)} the opposite way.',
+                    'Lay the conduit flat and check the offset — it should measure ${AppUnits.format(h!, mode)}.',
+                  ]),
+                ),
         );
       },
     );

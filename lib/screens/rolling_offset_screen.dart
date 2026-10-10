@@ -1,15 +1,11 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
-import '../diagrams.dart';
+import '../pro_diagram.dart';
+import '../pro_widgets.dart';
 import '../store.dart';
 import '../units.dart';
-import '../widgets.dart';
+import 'dart:math';
 
-/// Rolling offset: the obstacle is off to the side as well as up/down,
-/// so the true offset is the hypotenuse of rise and roll.
-///
-/// Math: true offset = sqrt(rise² + roll²);
-/// distance between marks = true offset × multiplier(angle).
+/// Rolling Offset — pro layout with drag-to-adjust rise.
 class RollingOffsetScreen extends StatefulWidget {
   const RollingOffsetScreen({super.key});
 
@@ -18,8 +14,8 @@ class RollingOffsetScreen extends StatefulWidget {
 }
 
 class _RollingOffsetScreenState extends State<RollingOffsetScreen> {
-  final _riseCtrl = TextEditingController();
-  final _rollCtrl = TextEditingController();
+  final _riseCtrl = TextEditingController(text: '6');
+  final _rollCtrl = TextEditingController(text: '6');
   double _angle = 30;
 
   @override
@@ -31,103 +27,127 @@ class _RollingOffsetScreenState extends State<RollingOffsetScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return CalcScaffold(
-      title: 'Rolling Offset',
-      subtitle:
-          'When the obstacle is offset sideways too, combine the vertical rise and horizontal roll into one true offset.',
-      builder: (context, mode) {
+    return ValueListenableBuilder<MeasureMode>(
+      valueListenable: AppUnits.mode,
+      builder: (context, mode, _) {
         final rise = AppUnits.parseInput(_riseCtrl.text, mode);
         final roll = AppUnits.parseInput(_rollCtrl.text, mode);
         final m = AppUnits.multipliers[_angle]!;
-        final trueOffset = (rise == null || roll == null)
+        final trueOff = (rise == null || roll == null)
             ? null
             : sqrt(rise * rise + roll * roll);
-        final dist = trueOffset == null ? null : trueOffset * m;
+        final dist = trueOff == null ? null : trueOff * m;
 
-        final fields = Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            LengthField(
-              label: 'Vertical rise',
-              controller: _riseCtrl,
-              mode: mode,
-              onChanged: () => setState(() {}),
-            ),
-            LengthField(
-              label: 'Horizontal roll',
-              controller: _rollCtrl,
-              mode: mode,
-              onChanged: () => setState(() {}),
-            ),
-            const SectionLabel('BEND ANGLE'),
-            AngleChips(
-              selected: _angle,
-              onSelected: (a) => setState(() => _angle = a),
-            ),
-            const SizedBox(height: 16),
-          ],
-        );
-
-        if (dist == null) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+        return ProCalcScaffold(
+          title: 'Rolling Offset',
+          inputBar: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              fields,
-              const HintCard(
-                  'Enter both the rise and the roll to get the true offset.'),
-            ],
-          );
-        }
-
-        final summary =
-            'Rolling offset rise ${AppUnits.format(rise!, mode)} roll ${AppUnits.format(roll!, mode)} @ ${AppUnits.angleLabel(_angle)} → marks ${AppUnits.format(dist, mode)} apart';
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            fields,
-            DragDiagramCard(
-              painter: RollingOffsetDiagramPainter(
-                distLabel: AppUnits.format(dist, mode),
-                riseLabel: AppUnits.format(rise!, mode),
-                rollLabel: AppUnits.format(roll!, mode),
-                trueLabel: AppUnits.format(trueOffset!, mode),
-                riseInches: rise!,
+              Row(
+                children: [
+                  Expanded(
+                    child: ProLengthInput(
+                      label: 'Rise',
+                      controller: _riseCtrl,
+                      mode: mode,
+                      onChanged: () => setState(() {}),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ProLengthInput(
+                      label: 'Roll',
+                      controller: _rollCtrl,
+                      mode: mode,
+                      onChanged: () => setState(() {}),
+                    ),
+                  ),
+                ],
               ),
-              onDrag: (pos, size) {
-                final v = RollingOffsetDiagramPainter.riseFromDragY(pos.dy);
-                final snapped = mode == MeasureMode.centimeters
-                    ? (v * AppUnits.inchToCm).roundToDouble() / AppUnits.inchToCm
-                    : (v * 2).round() / 2;
-                _riseCtrl.text = AppUnits.formatInput(snapped, mode);
-                setState(() {});
-              },
-            ),
-            const SizedBox(height: 12),
-            ResultCard(
-              label: 'Distance between bend marks',
-              value: AppUnits.format(dist, mode),
-              inchesValue: dist,
-              mode: mode,
-              note:
-                  'True offset ${AppUnits.format(trueOffset, mode)} × multiplier ${AppUnits.multLabel(m)}',
-              onSave: () => HistoryStore.add('Rolling Offset', summary).then(
-                  (_) => ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Saved to history')))),
-            ),
-            const SizedBox(height: 12),
-            StepsCard(
-              title: 'Marking steps',
-              steps: [
-                'Mark 1 where the first bend begins.',
-                'Measure ${AppUnits.format(dist, mode)} from Mark 1 and make Mark 2.',
-                'Roll the bender so the bend plane lines up with the true-offset direction, then bend Mark 1 to ${AppUnits.angleLabel(_angle)}.',
-                'Rotate the conduit 180° around its own axis, set the bender on Mark 2, and bend to ${AppUnits.angleLabel(_angle)} the opposite way.',
-                'Check the run: it should rise ${AppUnits.format(rise!, mode)} and roll ${AppUnits.format(roll!, mode)} off the original line.',
-              ],
-            ),
-          ],
+              const SizedBox(height: 10),
+              ProAngleChips(
+                selected: _angle,
+                onSelected: (a) => setState(() => _angle = a),
+              ),
+            ],
+          ),
+          body: dist == null
+              ? const Center(
+                  child: Text('Enter rise and roll',
+                      style: TextStyle(color: ProTheme.textDim)))
+              : ProDragDiagram(
+                  painter: _RollingPainter(
+                    riseIn: rise!,
+                    distLabel: AppUnits.format(dist, mode),
+                    riseLabel: AppUnits.format(rise, mode),
+                  ),
+                  onDragY: (dy, size) {
+                    final frac =
+                        ((150 - dy) / 110).clamp(0.02, 1.0);
+                    var v = (frac * 24).clamp(0.5, 24.0);
+                    v = (v * 2).round() / 2;
+                    _riseCtrl.text = AppUnits.formatInput(v, mode);
+                    setState(() {});
+                  },
+                ),
+          resultBar: dist == null
+              ? const ProResultBar(label: 'Between marks', value: '—')
+              : ProResultBar(
+                  label: 'Between marks',
+                  value: AppUnits.format(dist, mode),
+                  fraction: (mode != MeasureMode.centimeters)
+                      ? AppUnits.fraction(dist)
+                      : null,
+                  onSave: () {
+                    final summary =
+                        'Rolling offset rise ${AppUnits.format(rise!, mode)} roll ${AppUnits.format(roll!, mode)} → ${AppUnits.format(dist, mode)} apart';
+                    HistoryStore.add('Rolling Offset', summary).then((_) =>
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('Saved to history'))));
+                  },
+                  onSteps: () => showStepsSheet(context, 'Marking steps', [
+                    'True offset = ${AppUnits.format(trueOff!, mode)} (rise² + roll²).',
+                    'Mark 1, then measure ${AppUnits.format(dist, mode)} for Mark 2.',
+                    'Bend both to ${AppUnits.angleLabel(_angle)}, rolling the conduit between bends.',
+                    'Rotate the conduit so the offset kicks toward your target.',
+                  ]),
+                ),
         );
       },
     );
   }
+}
+
+class _RollingPainter extends CustomPainter {
+  final double riseIn;
+  final String distLabel;
+  final String riseLabel;
+  _RollingPainter(
+      {required this.riseIn, required this.distLabel, required this.riseLabel});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    const y0 = 150.0;
+    final frac = (riseIn / 24).clamp(0.04, 1.0);
+    final y1 = y0 - frac * 110;
+    final m1x = w * 0.36, m2x = w * 0.64;
+    ProPipe.draw(canvas, [
+      Offset(14, y0),
+      Offset(m1x, y0),
+      Offset(m2x, y1),
+      Offset(w - 14, y1),
+    ]);
+    ProPipe.mark(canvas, Offset(m1x, y0), '1');
+    ProPipe.mark(canvas, Offset(m2x, y1), '2');
+    ProPipe.dim(canvas, Offset(m1x, 28), Offset(m2x, 28), distLabel);
+    ProPipe.dim(canvas, Offset(w - 30, y1), Offset(w - 30, y0), riseLabel);
+    ProPipe.label(canvas, 'drag pipe ↕', Offset(w / 2, size.height - 16),
+        size: 11, color: ProTheme.textDim);
+  }
+
+  @override
+  bool shouldRepaint(covariant _RollingPainter old) =>
+      old.riseIn != riseIn || old.distLabel != distLabel;
 }

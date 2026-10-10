@@ -191,6 +191,16 @@ class AppUnits {
 
   static const List<double> angles = [10, 15, 22.5, 30, 45, 60];
 
+  /// Shrink per inch of offset (pullback) by bend angle.
+  static final Map<double, double> shrinkPerInch = {
+    10: 0.06,
+    15: 0.11,
+    22.5: 0.20,
+    30: 0.25,
+    45: 0.41,
+    60: 0.58,
+  };
+
   static String angleLabel(double a) =>
       a == a.roundToDouble() ? '${a.toInt()}°' : '${a}°';
 

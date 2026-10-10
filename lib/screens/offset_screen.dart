@@ -148,7 +148,7 @@ class _OffsetScreenState extends State<OffsetScreen> {
                                 : null,
                         onSave: () {
                           final summary =
-                              'Offset ${AppUnits.format(h, mode)} @ ${AppUnits.angleLabel(_angle)} → marks ${AppUnits.format(dist, mode)} apart';
+                              'Offset ${AppUnits.format(h!, mode)} @ ${AppUnits.angleLabel(_angle)} → marks ${AppUnits.format(dist, mode)} apart';
                           HistoryStore.add('Offset Bend', summary)
                               .then((_) => ScaffoldMessenger.of(
                                       context)
@@ -163,7 +163,7 @@ class _OffsetScreenState extends State<OffsetScreen> {
                           'Measure ${AppUnits.format(dist, mode)} from Mark 1 and make Mark 2.',
                           'Set the bender arrow on Mark 1 and bend to ${AppUnits.angleLabel(_angle)}.',
                           'Flip the conduit over, set the bender on Mark 2, and bend to ${AppUnits.angleLabel(_angle)} the opposite way.',
-                          'Check the offset — it should measure ${AppUnits.format(h, mode)}.',
+                          'Check the offset — it should measure ${AppUnits.format(h!, mode)}.',
                         ]),
                       ),
               ],

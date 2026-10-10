@@ -33,3 +33,4 @@ jobs:
         with:
           name: bendpro-aab
           path: build/app/outputs/bundle/release/app-release.aab
+# trigger production AAB build

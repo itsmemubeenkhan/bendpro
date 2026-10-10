@@ -9,8 +9,9 @@ class ShrinkScreen extends StatelessWidget {
   const ShrinkScreen({super.key});
 
   /// Shrink per inch of offset for standard angles (multiplier − cosecant
-  /// relationship reduced to the trade table values).
-  static const Map<double, double> shrinkPerInch = {
+  /// relationship reduced to the trade table values). (Non-const: double keys
+  /// are not allowed in const maps.)
+  static final Map<double, double> shrinkPerInch = {
     10: 0.06,
     15: 0.11,
     22.5: 0.20,

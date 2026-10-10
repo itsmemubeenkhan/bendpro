@@ -1,0 +1,16 @@
+# Keystore and signing - NEVER commit
+android/keystore/
+android/key.properties
+
+# Flutter/Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.iml

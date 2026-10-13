@@ -1,7 +1,8 @@
 name: Build BendPro Release AAB (permanent upload key)
 
-# Manual release builds signed with the PERMANENT Play upload keystore
-# (keystore + passwords come from repository secrets, never committed).
+# Manual release builds. CI compiles + debug-signs the AAB (no secrets needed);
+# the AAB is then RE-SIGNED locally with the permanent Play upload keystore
+# (~/workspace/keystores/bendpro.jks) via jarsigner before Play upload.
 on:
   workflow_dispatch:
 
@@ -18,22 +19,8 @@ jobs:
         with:
           flutter-version: '3.24.0'
           channel: 'stable'
-      - name: Restore permanent keystore
-        run: |
-          echo "${{ secrets.BENDPRO_KEYSTORE_BASE64 }}" | base64 -d > /tmp/bendpro-release.jks
-          {
-            echo "storeFile=/tmp/bendpro-release.jks"
-            echo "keyAlias=${{ secrets.BENDPRO_KEY_ALIAS }}"
-            echo "storePassword=${{ secrets.BENDPRO_STORE_PASSWORD }}"
-            echo "keyPassword=${{ secrets.BENDPRO_KEY_PASSWORD }}"
-          } > android/key.properties
       - run: flutter pub get
       - run: flutter build appbundle --release
-      - name: Show signing cert SHA1
-        run: |
-          unzip -p build/app/outputs/bundle/release/app-release.aab META-INF/*.RSA > /tmp/cert.rsa 2>/dev/null || \
-          for f in $(unzip -l build/app/outputs/bundle/release/app-release.aab | grep -o 'META-INF/[^ ]*\.RSA'); do unzip -p build/app/outputs/bundle/release/app-release.aab "$f" > /tmp/cert.rsa; break; done
-          keytool -printcert -file /tmp/cert.rsa | grep -i sha1
       - uses: actions/upload-artifact@v4
         with:
           name: bendpro-release-aab

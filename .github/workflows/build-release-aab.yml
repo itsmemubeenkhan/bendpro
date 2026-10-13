@@ -24,6 +24,13 @@ jobs:
           flutter-version: '3.24.0'
           channel: 'stable'
       - run: flutter pub get
+      - name: Generate throwaway test keystore
+        run: |
+          keytool -genkeypair -v -keystore /tmp/bendpro-test.jks -keyalg RSA -keysize 2048 -validity 10000 -alias bendpro -storepass testpass123 -keypass testpass123 -dname "CN=BendPro Test"
+          echo "storeFile=/tmp/bendpro-test.jks" > android/key.properties
+          echo "keyAlias=bendpro" >> android/key.properties
+          echo "storePassword=testpass123" >> android/key.properties
+          echo "keyPassword=testpass123" >> android/key.properties
       - run: flutter build appbundle --release
       - uses: actions/upload-artifact@v4
         with:
